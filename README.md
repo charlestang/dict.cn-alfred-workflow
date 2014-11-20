@@ -5,4 +5,4 @@
 Alfred 2 也是我用了很久的，早在2.0 还没有发布的时候， 我就购买了终身授权，可是直到最近才开始琢磨怎么开发workflow，
 也算是够笨的了。这么多年才把这么强大的功能给用出来。跟大家分享下。
 
-![使用dict关键字激活，查询Alfred](/charlestang/dict.cn-alfred2-workflow/master/screenshot.png "效果图")
+![使用dict关键字激活，查询Alfred](/screenshot.png "效果图")
