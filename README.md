@@ -1,4 +1,4 @@
-#Alfred2_dict_cn_workflow
+#dict.cn-alfred2-workflow
 
 其实海词辞典我一直用的很多，我认为这是我这几年见过的最好用的网络英汉、英英、汉英辞典，尤其是英汉、英英功能不错的。
 
