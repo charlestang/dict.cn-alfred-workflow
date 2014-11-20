@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string></string>
+	<key>category</key>
+	<string>Tools</string>
+	<key>connections</key>
+	<dict>
+		<key>9FBABFAE-871C-4477-BB25-59F62398D7E1</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>10F31944-6573-4489-991F-B01BF352E427</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Charles Tang</string>
+	<key>description</key>
+	<string>在线查询海词辞典</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Dict.cn</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>63</integer>
+				<key>keyword</key>
+				<string>dict</string>
+				<key>runningsubtext</key>
+				<string>正在查询请稍等</string>
+				<key>script</key>
+				<string>require_once('workflows.php');
+$w = new Workflows();
+$query = urlencode( "{query}" );
+$url = "http://dict.cn/apis/suggestion.php?q=$query&amp;dict=dict&amp;s=dict&amp;lt=zh-cn";
+$suggestions = $w-&gt;request( $url );
+$suggestions = json_decode( $suggestions );
+
+foreach( $suggestions-&gt;s as $k =&gt; $suggest ):
+	$w-&gt;result( $k, 'http://dict.cn/' . $suggest-&gt;g, $suggest-&gt;g . ' — ' . str_replace('&amp;nbsp;', ' ',$suggest-&gt;e), '', '' );
+endforeach;
+
+if ( count( $w-&gt;results() ) == 0 ):
+      	$w-&gt;result( 'notfound', 'http://dict.cn/'. $query, '糟糕…', '没找到, 去海词搜搜看？', 'icon.png', 'yes' );
+endif;	
+
+echo $w-&gt;toxml();</string>
+				<key>subtext</key>
+				<string>请输入要查询的中英文单词</string>
+				<key>title</key>
+				<string>请输入单词</string>
+				<key>type</key>
+				<integer>1</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>9FBABFAE-871C-4477-BB25-59F62398D7E1</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>plusspaces</key>
+				<false/>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>10F31944-6573-4489-991F-B01BF352E427</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>10F31944-6573-4489-991F-B01BF352E427</key>
+		<dict>
+			<key>ypos</key>
+			<real>130</real>
+		</dict>
+		<key>9FBABFAE-871C-4477-BB25-59F62398D7E1</key>
+		<dict>
+			<key>ypos</key>
+			<real>130</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>http://sexywp.com</string>
+</dict>
+</plist>
