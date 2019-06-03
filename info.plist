@@ -3,27 +3,29 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string></string>
+	<string>com.sexywp.dict</string>
 	<key>category</key>
-	<string>Tools</string>
+	<string>Productivity</string>
 	<key>connections</key>
 	<dict>
-		<key>9FBABFAE-871C-4477-BB25-59F62398D7E1</key>
+		<key>2FA4A9F1-DFDA-43AC-BEA8-BB4C5AD22AD2</key>
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>10F31944-6573-4489-991F-B01BF352E427</string>
+				<string>D5BCC350-E0CA-4A8C-A10E-6EB93B4234FB</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
 				<string></string>
+				<key>vitoclose</key>
+				<false/>
 			</dict>
 		</array>
 	</dict>
 	<key>createdby</key>
 	<string>Charles Tang</string>
 	<key>description</key>
-	<string>在线查询海词辞典</string>
+	<string>海辞网络词典查询</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
@@ -33,33 +35,131 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>browser</key>
+				<string>com.google.Chrome</string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>https://dict.cn/{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>D5BCC350-E0CA-4A8C-A10E-6EB93B4234FB</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
 				<key>argumenttype</key>
 				<integer>0</integer>
 				<key>escaping</key>
-				<integer>63</integer>
+				<integer>0</integer>
 				<key>keyword</key>
 				<string>dict</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<false/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
 				<key>runningsubtext</key>
-				<string>正在查询请稍等</string>
+				<string>正在联网查询dict.cn，请稍后……</string>
 				<key>script</key>
-				<string>require_once('workflows.php');
-$w = new Workflows();
-$query = urlencode( "{query}" );
-$url = "http://dict.cn/apis/suggestion.php?q=$query&amp;dict=dict&amp;s=dict&amp;lt=zh-cn";
-$suggestions = $w-&gt;request( $url );
-$suggestions = json_decode( $suggestions );
+				<string>use Alfred\Workflows\Workflow;
 
-foreach( $suggestions-&gt;s as $k =&gt; $suggest ):
-	$w-&gt;result( $k, 'http://dict.cn/' . $suggest-&gt;g, $suggest-&gt;g . ' — ' . str_replace('&amp;nbsp;', ' ',$suggest-&gt;e), '', '' );
+require "Result.php";
+require "Workflow.php";
+
+function empty_filter($a)
+{
+    if ($a == '' || $a == null) :                        // if $a is empty or null
+        return false;                                    // return false, else, return true
+    else :
+        return true;
+    endif;
+}
+
+function request($url = null, $options = null)
+{
+    if (is_null($url)) :
+        return false;
+    endif;
+
+    $defaults = array(                                  // Create a list of default curl options
+        CURLOPT_RETURNTRANSFER =&gt; true,                 // Returns the result as a string
+        CURLOPT_URL =&gt; $url,                            // Sets the url to request
+        CURLOPT_FRESH_CONNECT =&gt; true
+    );
+
+    if ($options) :
+        foreach ($options as $k =&gt; $v) :
+            $defaults[$k] = $v;
+        endforeach;
+    endif;
+
+    array_filter($defaults, 'empty_filter');            // Filter out empty options from the array
+
+    $ch  = curl_init();                                 // Init new curl object
+    curl_setopt_array($ch, $defaults);                  // Set curl options
+    $out = curl_exec($ch);                              // Request remote data
+    $err = curl_error($ch);
+    curl_close($ch);                                    // End curl request
+
+    if ($err) :
+        return $err;
+    else :
+        return $out;
+    endif;
+}
+
+$query = urlencode("{query}");
+$url = "http://apis.dict.cn/apis/suggestion.php?q=$query&amp;amp;dict=dict&amp;amp;s=dict&amp;amp;lt=zh-cn";
+$options = array(
+    CURLOPT_HTTPHEADER =&gt; array(
+        'Host: apis.dict.cn',
+        'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:67.0) Gecko/20100101 Firefox/67.0',
+        'Accept: */*',
+        'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+        'Accept-Encoding: gzip, deflate',
+        'Referer: http://dict.cn/',
+        'Connection: keep-alive',
+    ),
+);
+$suggestions = request($url, $options);
+$suggestions = json_decode($suggestions);
+
+$w = new Workflow();
+
+foreach ($suggestions-&gt;s as $k =&gt; $suggest) :
+    $w-&gt;result()
+    -&gt;title($suggest-&gt;g)
+    -&gt;arg($suggest-&gt;g)
+    -&gt;uid($k)
+    -&gt;quicklookurl('http://dict.cn/' . $suggest-&gt;g)
+    -&gt;subtitle($suggest-&gt;g . ' — ' . str_replace('&amp;nbsp;', ' ', $suggest-&gt;e));
 endforeach;
 
-if ( count( $w-&gt;results() ) == 0 ):
-      	$w-&gt;result( 'notfound', 'http://dict.cn/'. $query, '糟糕…', '没找到, 去海词搜搜看？', 'icon.png', 'yes' );
-endif;	
-
-echo $w-&gt;toxml();</string>
+echo $w-&gt;output();</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
 				<key>subtext</key>
-				<string>请输入要查询的中英文单词</string>
+				<string>请输入要查询的单词</string>
 				<key>title</key>
 				<string>请输入单词</string>
 				<key>type</key>
@@ -70,44 +170,35 @@ echo $w-&gt;toxml();</string>
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
-			<string>9FBABFAE-871C-4477-BB25-59F62398D7E1</string>
+			<string>2FA4A9F1-DFDA-43AC-BEA8-BB4C5AD22AD2</string>
 			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>plusspaces</key>
-				<false/>
-				<key>url</key>
-				<string>{query}</string>
-				<key>utf8</key>
-				<true/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.openurl</string>
-			<key>uid</key>
-			<string>10F31944-6573-4489-991F-B01BF352E427</string>
-			<key>version</key>
-			<integer>0</integer>
+			<integer>3</integer>
 		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
 	<key>uidata</key>
 	<dict>
-		<key>10F31944-6573-4489-991F-B01BF352E427</key>
+		<key>2FA4A9F1-DFDA-43AC-BEA8-BB4C5AD22AD2</key>
 		<dict>
+			<key>xpos</key>
+			<integer>230</integer>
 			<key>ypos</key>
-			<real>130</real>
+			<integer>220</integer>
 		</dict>
-		<key>9FBABFAE-871C-4477-BB25-59F62398D7E1</key>
+		<key>D5BCC350-E0CA-4A8C-A10E-6EB93B4234FB</key>
 		<dict>
+			<key>xpos</key>
+			<integer>400</integer>
 			<key>ypos</key>
-			<real>130</real>
+			<integer>220</integer>
 		</dict>
 	</dict>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string></string>
 	<key>webaddress</key>
-	<string>http://sexywp.com</string>
+	<string>https://sexywp.com</string>
 </dict>
 </plist>
