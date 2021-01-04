@@ -140,6 +140,7 @@ $options = array(
     ),
 );
 $suggestions = request($url, $options);
+$suggestions = preg_replace("#^\d+$#m", "", $suggestions, 20);
 $suggestions = json_decode($suggestions);
 
 $w = new Workflow();
