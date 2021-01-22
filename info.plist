@@ -126,7 +126,7 @@ function request($url = null, $options = null)
     endif;
 }
 
-$query = urlencode("{query}");
+$query = urlencode(substr("{query}", 0, 10));
 $url = "http://apis.dict.cn/apis/suggestion.php?q=$query&amp;amp;dict=dict&amp;amp;s=dict&amp;amp;lt=zh-cn";
 $options = array(
     CURLOPT_HTTPHEADER =&gt; array(
